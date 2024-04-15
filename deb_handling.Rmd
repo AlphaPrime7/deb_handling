@@ -1,0 +1,169 @@
+---
+title: "Install deb files in Ubuntu"
+output: html_notebook
+---
+
+## Ubuntu Store
+
+- Open with store 
+- Install from the store GUI.
+- Simplest approach
+
+## dpkg
+
+```{bash}
+sudo dpkg -i ~/Documents/...deb
+```
+
+## apt
+
+```{bash}
+sudo apt install ~/Documents/...deb
+sudo apt remove ~/Documents/...deb
+#in Ubuntu no need for quotes when stringifying an absolute path
+```
+
+
+## Gdebi
+
+```{bash}
+sudo apt install gdebi -y
+sudo gdebi ~/Documents/...deb
+#Right click and use the Ubuntu GUI to install the package using the gdebi program
+```
+
+## alien
+
+```{bash}
+sudp apt install alien
+sudo alien ~/Documents/...rpm
+#rpm = redhat pkg manager
+```
+
+## source
+
+### Compilers
+
+```{bash}
+sudo apt install build-essential #contains the gcc compiler for c/c++ source code
+sudo apt-get install automake #for .sh run/config
+sudo apt-get install checkinstall #safe program insertion into the system
+sudo apt-get install gcj #for java programs
+
+apt-cache search alien #search apt store for alien info; equivalent to help on pkgs
+
+```
+
+### Help
+
+```{bash}
+apt-cache search alien #search apt store for alien info; equivalent to help on pkgs
+```
+
+### Source extraction
+
+```{bash}
+#MANUAL
+tar -xvf libav_0.8.6.orig.tar.gz #unzip tar.gz; 
+tar -xvf libav_0.8.6.orig.tar.bz2 #file format .bz2
+unzip libav_0.8.6.orig.zip #file format .zip
+
+#CVS-Over network
+sudo apt install cvs
+cvs -d :pserver:anonymous@anoncvs.gnome.org:/cvs/gnome login
+cvs -d :pserver:anonymous@anoncvs.gnome.org:/cvs/gnome co NetworkManager 
+
+#BZR
+sudo apt install bzr
+bzr get lp:network-manager
+```
+
+### Check Deps
+
+```{bash}
+cd libav-0.8.6 #pkg dir
+sudo apt-get install yasm # a dep for manipulating config file paths
+./configure --help | less #config help
+#open the config file within the unzipped pkg
+#under #installation paths prefix_default = "/usr/local"
+./configure --prefix=/opt #change to whatever path you desire, doesn't seem to work so advice is to change in file directly if necessary
+./configure #use default config settings; output for goahead to compiling is config.status: creating Makefile... 0 Errs
+
+#Dealing with source installations
+#Go to etc/apt and edit the sources.list file (toggle sources and that should do the trick) OR below
+software-properties-gtk
+#Alternatively using the CLI, perform this:
+cat /etc/apt/sources.list | grep deb-src 
+sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list #a few other sources.list files are created, unsure if this is true cuz i did not notice this before
+sudo apt update
+sudo apt-get build-dep ffmpeg #the pkg compiled by libav
+
+#ALT: auto-apt
+apt-cache search auto-apt
+wget https://mirrors.edge.kernel.org/ubuntu/pool/universe/a/auto-apt/auto-apt_0.3.24_amd64.deb
+sudo dpkg -i auto-apt_0.3.24_amd64.deb
+sudo apt install -f
+sudo apt install auto-apt #check with this
+sudo auto-apt update
+auto-apt --help
+cd libav-0.8.6
+auto-apt search config.h
+
+#GEN CONFIG: autoconf
+sudo apt install autoconf
+cd libav-0.8.6
+autoconf
+
+#IGNORE:
+./configure --disable-FEATURE option
+```
+
+### Compile
+
+```{bash}
+cd libav-0.8.6 #pkg dir
+make
+
+#All works:
+src/ffmpeg #it failed to build so no worries here, pkg is already installed; i decided against deps for ffmpeg when using the command sudo apt-get build-dep ffmpeg. I bet if i get these deps then things should be fine if not NO WORRIES.
+```
+
+
+### Installation
+
+```{bash}
+sudo checkinstall #a .deb file is created
+sudo checkinstall --fstrans=0 #if previous fails
+sudo make install #legacy method ill advised
+```
+
+
+## Kernel Modules (LKMs)
+
+```{bash}
+#need gcc3.4 and kernel headers
+#pain is KMs must be recompiled after kernel upgrades
+#Why KMs? extend kernel core function with little to no hassle
+#lib/modules is one place to find KMs
+sudo apt-get install gcc-3.4 linux-headers-$(uname -r)
+
+#Recompile using an existing deb pkg
+dpkg-buildpackage -rfakeroot
+```
+
+
+## Interpreted languages
+
+
+```{bash}
+#Perl:
+apt-cache search foo | grep bar
+apt-cache search xml | grep parser
+
+#Python:
+apt-cache search python | grep mysql
+
+#Ruby:
+apt-cache search ruby | grep activesupport
+```
+
